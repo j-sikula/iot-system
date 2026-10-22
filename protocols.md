@@ -9,6 +9,7 @@
 
 [Matter App cluster specification PDF](https://csa-iot.org/wp-content/uploads/2026/09/23-27350-011_Matter-1.6.1-Application-Cluster-Specification.pdf)
 
+https://docs.silabs.com/matter/latest/matter-fundamentals-introduction/
 
 
 | EQ Parameter | Cluster ID & PICS | Spec Section & Pages | Attribute ID & Name | Data Type | Encoding Formula & Resolution | Valid Range & Special Values |
@@ -32,3 +33,43 @@ Encoded as MeasurementUnitEnum (enum8, 1 byte) (Page 211):
 - 5 = NGM3 ($\text{ng/m}^3$)   
 - 6 = PM3 (Particles per $\text{m}^3$)   
 - 7 = BQM3 (Becquerel per $\text{m}^3$, $\text{Bq/m}^3$ — standard for Radon)   
+
+# Personalized Building Comfort Control (Feldmeier 2009 - MIT thesis)
+
+### Network Transmit Command Packet [0x]
+
+| Command | Packet Format [0x] |
+| :--- | :--- |
+| Open Motor Full | ff 06 08 DES 08 08 ff fe fd |
+| Close Motor Full | ff 06 08 DES 08 06 ff fe fd |
+| Open Motor n-Steps | ff 06 08 DES 08 08 n fe fd |
+| Close Motor n-Steps | ff 06 08 DES 08 06 n fe fd |
+| Stop Motor | ff 06 08 DES 06 0a ff fe fd |
+
+### Network Receive Command Packet [0x]
+
+| Packet Type | Packet Format [0x] |
+| :--- | :--- |
+| Data From Portable Node | ff 0d 02 SRC BTN HUM TEMP ACT1 LITE LQI RSSI DES fe fd |
+| Data From Room Node | ff 07 03 LITE TEMP HUM ACT2 SRC fe fd |
+| Data From Control Node | ff 0d 07 SRC MOTR HUM TEMP WIND LITE LQI RSSI DES fe fd |
+| Join Request | ff 05 01 SRC LQI RSSI DES fe fd |
+| Join Request Fail | ff 03 06 DES SRC fe fd |
+| Location Beacon | ff 05 00 SRC LQI RSSI DES fe fd |
+
+### Field Definitions
+
+| Field | Description | Size & Format |
+| :--- | :--- | :--- |
+| **SRC** | Data Source Address | 2 bytes, LSB first |
+| **BTN** | Button Press Information | 1 byte |
+| **HUM** | Humidity Data | 1 byte |
+| **TEMP** | Temperature Data | 2 bytes, LSB first |
+| **ACT1** | Inertial Activity Data | 2 bytes, LSB first |
+| **LITE** | Light Level Data | 2 bytes, LSB first |
+| **LQI** | Link Quality Indicator | 1 byte |
+| **RSSI** | Received Signal Strength Indicator | 1 byte |
+| **DES** | Data Destination Address | 2 bytes, LSB first |
+| **ACT2** | PIR Motion Data | 1 byte |
+| **MOTR** | Motor State Information | 1 byte |
+| **WIND** | Wind Speed Data | 2 bytes, LSB first |
