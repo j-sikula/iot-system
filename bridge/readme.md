@@ -4,6 +4,8 @@
 
 # Telegraf
 
+Subcribes to topics defined in `telegraf.conf` and writes data to TimescaleDB
+
 ## Instalation
 
 ```
@@ -24,3 +26,15 @@ rm ./influxdata-archive.key
 sudo apt update && sudo apt install -y telegraf
 ```
 
+## Management
+
+Configuration file `telegraf.conf` can be modified using:
+
+```
+sudo nano /etc/telegraf/telegraf.conf
+```
+
+Apply changes:
+```
+sudo systemctl restart telegraf
+```
