@@ -9,4 +9,17 @@
    ```bash
    sudo -u postgres psql -d iot_ieq -f schema.sql
    ```
+   
+
+Database console:
+```
+sudo -u postgres psql
+```
+
+Connect to database (in database mode, e. g.`postgres=#`):
+```
+\c iot_ieq
+```
+
+
 

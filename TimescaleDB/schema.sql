@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 -- Table 1: Telemetry (TimescaleDB Hypertable)
 CREATE TABLE IF NOT EXISTS ieq_readings (
     time TIMESTAMPTZ NOT NULL,
-    device_id VARCHAR(64) NOT NULL,
+    device_id TEXT NOT NULL,
     battery_percent REAL,    -- 0x002F Power Source (BatPercentRemaining)
     temperature REAL,        -- 0x0402 Temperature 
     pressure REAL,           -- 0x0403 Pressure 
@@ -21,8 +21,6 @@ CREATE TABLE IF NOT EXISTS ieq_readings (
     radon REAL               -- 0x042F Radon 
 );
 
--- Turn this into a TimescaleDB Hypertable (chunked by 7 days)
-SELECT create_hypertable('ieq_readings', by_range('time', INTERVAL '7 days'));
 
 
 -- Convert to Hypertable (if not already converted)
