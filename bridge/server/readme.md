@@ -46,4 +46,20 @@ acme.sh --install-cert -d your-pc.dynv6.net \
   --reloadcmd "chown -R mosquitto:mosquitto /etc/mosquitto/certs && chmod 700 /etc/mosquitto/certs && chmod 600 /etc/mosquitto/certs/* && systemctl restart mosquitto"
 ```
 
+For HTTPS just simplier:
+
+```bash
+sudo mkdir -p /etc/nginx/certs
+sudo su -
+
+acme.sh --issue --dns dns_dynv6 -d api.iot-system.dynv6.net --server letsencrypt
+
+acme.sh --install-cert -d api.iot-system.dynv6.net \
+  --cert-file /etc/nginx/certs/cert.pem \
+  --key-file /etc/nginx/certs/privkey.pem \
+  --fullchain-file /etc/nginx/certs/fullchain.pem \
+  --reloadcmd "systemctl reload nginx"
+exit
+```
+
 

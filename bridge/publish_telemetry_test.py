@@ -27,10 +27,13 @@ MQTT_TLS = {
 data = {
     "device_id": "87463920193847-45",
     "timestamp_unix": int(time.time()),
-    "battery_percent": 80.1,
-    "temperature": 22.6,
-    "co2": 1890.0,
-    "pm25": 100.4
+    "battery_percent": 70.1,
+    "temperature": 202.6,
+    "co2": 1000.0,
+    "pm25": 10.401e-6,
+    "location": "Room 101",
+    "o3": 0.0001,
+    "voc": 0.0002
 }
 
 json_payload = json.dumps(data)
