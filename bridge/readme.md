@@ -1,6 +1,29 @@
 # Bridge from Matter to TimescaleDB
 
 # MQTT Broker - mosquitto
+Install
+```
+sudo apt install mosquitto
+```
+
+Create password for user telegraf and grant permissions:
+```
+sudo mosquitto_passwd -c /etc/mosquitto/passwd telegraf
+
+sudo chown root:mosquitto /etc/mosquitto/passwd
+sudo chmod 640 /etc/mosquitto/passwd
+```
+
+Configuration of network - MQTT broker
+```
+sudo nano /etc/mosquitto/conf.d/network.conf
+sudo systemctl restart mosquitto
+```
+
+## Debug
+```
+sudo journalctl -u mosquitto.service -n 20 --no-pager
+```
 
 # Telegraf
 
@@ -37,4 +60,10 @@ sudo nano /etc/telegraf/telegraf.conf
 Apply changes:
 ```
 sudo systemctl restart telegraf
+```
+
+## Debug
+
+```
+sudo journalctl -u telegraf -n 50 --no-pager
 ```
