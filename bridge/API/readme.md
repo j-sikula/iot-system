@@ -110,6 +110,7 @@ Paste the following configuration, and updating the Let's Encrypt certificate pa
 
 server {
     listen 80;
+    listen [::]:80;
     server_name api.iot-system.dynv6.net;
     # Force redirect from HTTP to HTTPS
     return 301 https://$host$request_uri;
@@ -117,6 +118,7 @@ server {
 
 server {
     listen 443 ssl;
+    listen [::]:443 ssl;
     server_name api.iot-system.dynv6.net;
 
     # Let's Encrypt SSL Certificates
