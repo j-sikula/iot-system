@@ -31,9 +31,9 @@ data = {
     "temperature": 202.6,
     "co2": 1000.0,
     "pm25": 10.401e-6,
-    "location": "Room 101",
+    "location": "Room 101", # if not defined in table, it will be dropped by the bridge
     "o3": 0.0001,
-    "voc": 0.0002
+    "tvoc": 0.0002
 }
 
 json_payload = json.dumps(data)
@@ -48,7 +48,7 @@ try:
         auth=MQTT_AUTH,  # Pass the credentials
         tls=MQTT_TLS     # Enable TLS encryption
     )
-    print(f"Successfully published data to '{TOPIC}'")
+    print(f"Successfully published data {json_payload} to '{TOPIC}'")
     
 except Exception as e:
     print(f"Failed to publish message: {e}")
