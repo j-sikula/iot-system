@@ -1,0 +1,12 @@
+# Dependency directories
+node_modules/
+
+# Compiled TypeScript output (if you use it later)
+dist/
+build/
+
+# Matter.js persistent storage (Crucial: Do not commit your network keys!)
+.matter/
+
+# Environmental variables (if you add secrets later)
+.env
