@@ -13,6 +13,7 @@
   "dependencies": {
     "@matter/main": "^0.18.0",
     "@matter/node": "^0.18.0",
+    "@matter/nodejs": "^0.18.0",
     "express": "^5.3.0",
     "mqtt": "^5.16.1"
   },

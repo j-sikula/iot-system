@@ -12,7 +12,7 @@ async function commissionSensor(serverNode: ServerNode, passcode: number, shortD
 
     const peer = await serverNode.peers.commission({
         passcode: passcode,
-        discriminator: shortDiscriminator,
+        shortDiscriminator: shortDiscriminator,
         discoveryCapabilities: { ble: true },
         regulatoryLocation: GeneralCommissioning.RegulatoryLocationType.IndoorOutdoor,
         regulatoryCountryCode: "XX",

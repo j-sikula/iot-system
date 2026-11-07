@@ -66,6 +66,11 @@ npm install -D @types/express
 
 *Verification:* Run `ls -l`. You should see a `node_modules` folder, `package.json`, and `package-lock.json`.
 
+For emulator of device encapsulation of network required
+```bash
+npm install @matter/nodejs
+```
+
 
 3. **Configure TypeScript:** tsconfig.json.
 Generate the TypeScript configuration file and set it to use modern ES modules, which `matter.js` requires.
