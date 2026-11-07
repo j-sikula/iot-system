@@ -2,26 +2,31 @@
 
 # MQTT Broker - mosquitto
 Install
-```
+```bash
 sudo apt install mosquitto
 ```
 
 Create password for user telegraf and grant permissions:
-```
+```bash
 sudo mosquitto_passwd -c /etc/mosquitto/passwd telegraf
 
 sudo chown root:mosquitto /etc/mosquitto/passwd
 sudo chmod 640 /etc/mosquitto/passwd
 ```
 
-Configuration of network - MQTT broker
+For adding other user:
+```bash
+sudo mosquitto_passwd /etc/mosquitto/passwd <new_username>
 ```
+
+Configuration of network - MQTT broker
+```bash
 sudo nano /etc/mosquitto/conf.d/network.conf
 sudo systemctl restart mosquitto
 ```
 
 ## Debug
-```
+```bash
 sudo journalctl -u mosquitto.service -n 20 --no-pager
 ```
 
@@ -31,7 +36,7 @@ Subcribes to topics defined in `telegraf.conf` and writes data to TimescaleDB
 
 ## Instalation
 
-```
+```bash
 # 1. Ensure the keyrings directory exists
 sudo mkdir -p -m 755 /etc/apt/keyrings
 
@@ -53,17 +58,17 @@ sudo apt update && sudo apt install -y telegraf
 
 Configuration file `telegraf.conf` can be modified using:
 
-```
+```bash
 sudo nano /etc/telegraf/telegraf.conf
 ```
 
 Apply changes:
-```
+```bash
 sudo systemctl restart telegraf
 ```
 
 ## Debug
 
-```
+```bash
 sudo journalctl -u telegraf -n 50 --no-pager
 ```

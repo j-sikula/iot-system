@@ -1,9 +1,21 @@
+Using `matter.js` library - creates Matter controller (accept new devices) and Matter bridge to MQTT
 
 ## Get started
 
+Install dependencies
 ```bash
 npm install
-npx tsx src/index.ts
+```
+
+Add secrets into `.env`
+
+```
+MQTT_PASSWORD = "password"
+```
+
+Run main script
+```bash
+npx tsx --env-file=.env src/index.ts
 ```
 
 ## Installation 
@@ -50,7 +62,6 @@ npm install @matter/main @matter/node mqtt
 npm install -D typescript @types/node tsx
 npm install express
 npm install -D @types/express
-npm install @project-chip/matter.js
 ```
 
 *Verification:* Run `ls -l`. You should see a `node_modules` folder, `package.json`, and `package-lock.json`.
