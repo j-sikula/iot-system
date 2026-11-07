@@ -69,7 +69,7 @@ export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: st
 
             const payload: Record<string, any> = {
                 device_id: `${fabricId}-${nodeId.toString()}`,
-                timestamp_unix: new Date().toISOString()
+                timestamp_unix: new Date().valueOf()/1000, // Unix timestamp in seconds
             };
 
             let hasTelemetry = false;
