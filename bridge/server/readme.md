@@ -1,4 +1,4 @@
-## DNS 
+# DNS 
 For DNS used free dynv6.net prefix, updating IP adresses using "small script" [`dynv6.sh`](https://gist.github.com/corny/7a07f5ac901844bd20c9)
 
 Implementing the dynv6 Script
@@ -12,7 +12,7 @@ Implementing the dynv6 Script
 4. Add the cron job, passing your token as an environment variable and your hostname as the first argument:
 `*/5 * * * * token=YOUR_API_TOKEN /usr/local/bin/dynv6.sh your-pc.dynv6.net > /dev/null 2>&1`
 
-## TLS - acme.sh
+# TLS - acme.sh
 
 https://github.com/acmesh-official/acme.sh
 
@@ -50,10 +50,17 @@ For HTTPS just simplier:
 
 ```bash
 sudo mkdir -p /etc/nginx/certs
+```
+
+```bash
 sudo su -
+```
 
-acme.sh --issue --dns dns_dynv6 -d api.iot-system.dynv6.net --server letsencrypt
+```bash
+acme.sh --issue --dns dns_dynv6 -d api.iot-system.dynv6.net -d grafana.iot-system.dynv6.net --server letsencrypt
+```
 
+```bash
 acme.sh --install-cert -d api.iot-system.dynv6.net \
   --cert-file /etc/nginx/certs/cert.pem \
   --key-file /etc/nginx/certs/privkey.pem \
@@ -63,3 +70,59 @@ exit
 ```
 
 
+# Nginx
+
+## Install & Configure Nginx
+Install the Nginx web server, which will act as the security layer in front of PostgREST.
+```Bash
+
+sudo apt update && sudo apt install -y nginx
+```
+
+### PostgREST
+Create the Proxy Configuration
+Create a new Nginx server block configuration file for your API.
+```Bash
+
+sudo nano /etc/nginx/sites-available/postgrest
+```
+Fill `postgrest.nginx`
+
+
+Enable the Proxy and Restart
+Link your new configuration to the enabled sites folder, verify there are no typos, and restart the Nginx service.
+```Bash
+
+# Enable the configuration
+sudo ln -s /etc/nginx/sites-available/postgrest /etc/nginx/sites-enabled/
+
+# Test the Nginx syntax to ensure it is valid
+sudo nginx -t
+
+# Apply the changes
+sudo systemctl restart nginx
+```
+You can now securely query your raw database tables over the internet by accessing [https://api.iot-system.dynv6.net/ieq_readings](https://api.iot-system.dynv6.net/ieq_readings).
+
+### Grafana
+```bash
+sudo nano /etc/nginx/sites-available/grafana
+```
+Paste `grafana.nginx` and save.
+
+Apply and reload:
+```bash
+# Enable the configuration
+sudo ln -s /etc/nginx/sites-available/grafana /etc/nginx/sites-enabled/
+
+# Test the Nginx syntax to ensure it is valid
+sudo nginx -t
+
+# Apply the changes
+sudo systemctl restart nginx
+```
+
+
+
+## Official Documentation Reference
+For more advanced Nginx configurations with PostgREST (including rate limiting and caching setups), refer to the official PostgREST reverse proxy documentation:https://docs.postgrest.org/en/stable/explanations/nginx.html

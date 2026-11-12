@@ -13,9 +13,14 @@ Add secrets into `.env`
 MQTT_PASSWORD = "password"
 ```
 
-Run main script
+Run Matter controller script
 ```bash
 npx tsx --env-file=.env src/index.ts
+```
+
+Run emulator of CO2 sensor
+```bash
+npx tsx sensor_emulator/index.ts    
 ```
 
 ## Installation 
