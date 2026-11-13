@@ -11,15 +11,11 @@
    ```
 
 
-Database console:
+Database console for iot_ieq DB:
 ```
-sudo -u postgres psql
+sudo -u postgres psql -d iot_ieq
 ```
 
-Connect to database (in database mode, e. g.`postgres=#`):
-```
-\c iot_ieq
-```
 
 ## User for Telegraf
 ```
