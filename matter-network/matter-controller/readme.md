@@ -20,7 +20,7 @@ npx tsx --env-file=.env src/index.ts
 
 Run emulator of CO2 sensor
 ```bash
-npx tsx sensor_emulator/index.ts    
+npx tsx src/sensor_emulator.ts
 ```
 
 ## Installation 
