@@ -45,4 +45,10 @@ async function main() {
     }
 
     startWebServer(serverNode, 3000);
+
 }
+
+main().catch(error => {
+    console.error("Fatal Application Error:", error);
+    process.exit(1);
+});
