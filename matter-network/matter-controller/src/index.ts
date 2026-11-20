@@ -1,27 +1,21 @@
 import "@matter/node";
-import "@matter/nodejs-ble"; // <-- 1. Register the Node.js BLE platform
+import "@matter/nodejs-ble";
 
 import { Environment } from "@matter/main";
+import { Ble } from "@matter/protocol";
+import { TransportSet } from "@matter/general";
 import { ServerNode, ControllerBehavior } from "@matter/node";
 
 import { setupGlobalBridge } from "./bridge.js";
 import { startWebServer } from "./api.js";
 
-
-
 async function main() {
-    // Read the environment variable
     const MQTT_PASSWORD = process.env.MQTT_PASSWORD;
-
     if (!MQTT_PASSWORD) {
         throw new Error("Missing required environment variable: MQTT_PASSWORD");
-
     }
 
-    // 2. Explicitly enable BLE before creating ServerNode
     Environment.default.vars.set("ble.enable", true);
-    // Optional: specify adapter index if not hci0
-    // Environment.default.vars.set("ble.hci.id", 0);
 
     console.log("Initializing Matter Controller...");
 
@@ -31,27 +25,24 @@ async function main() {
             environment: Environment.default,
             id: "ieq-controller",
             commissioning: { enabled: false },
-            network: { ble: false }, // Prevents ServerNode from registering BlenoPeripheralInterface
             controller: { adminFabricLabel: "IEQ Pi Bridge" }
         }
     );
 
     await serverNode.start();
+
+    // Remove the server's BLE peripheral interface so outbound commissioning uses centralInterface
+    const netTransports = serverNode.env.get(TransportSet);
+    const ble = serverNode.env.get(Ble);
+    netTransports.delete(ble.peripheralInterface);
+
     console.log("Matter Controller Node started successfully.");
 
-    // Initialize the MQTT bridge
     await setupGlobalBridge(serverNode, MQTT_PASSWORD);
 
-    // Auto-subscribe to all previously paired peers on boot
     for (const peer of serverNode.peers.commissioned) {
         await peer.set({ network: { autoSubscribe: true } });
     }
 
-    // Initialize the Express Web Server
     startWebServer(serverNode, 3000);
 }
-
-main().catch(error => {
-    console.error("Fatal Application Error:", error);
-    process.exit(1);
-});
