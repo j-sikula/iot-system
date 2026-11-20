@@ -1,4 +1,5 @@
 import "@matter/node";
+import "@matter/nodejs-ble"; // <-- 1. Register the Node.js BLE platform
 
 import { Environment } from "@matter/main";
 import { ServerNode, ControllerBehavior } from "@matter/node";
@@ -17,6 +18,10 @@ async function main() {
     
     }
 
+    // 2. Explicitly enable BLE before creating ServerNode
+    Environment.default.vars.set("ble.enable", true);
+    // Optional: specify adapter index if not hci0
+    // Environment.default.vars.set("ble.hci.id", 0);
 
     console.log("Initializing Matter Controller...");
 

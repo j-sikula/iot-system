@@ -138,6 +138,11 @@ Check (should be up running)
 hciconfig
 ```
 
+grant permissions
+```bash
+sudo setcap cap_net_raw+eip $(eval readlink -f $(which node))
+```
+
 get thread credentials:
 ```bash
 sudo ot-ctl networkname
