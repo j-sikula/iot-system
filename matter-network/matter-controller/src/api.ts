@@ -3,6 +3,11 @@ import { ServerNode } from "@matter/node";
 import { ManualPairingCodeCodec } from "@matter/main/types";
 import { GeneralCommissioning } from "@matter/main/clusters";
 import { FabricAuthority } from "@matter/protocol";
+import { BasicInformationClient } from "@matter/node/behaviors";
+import { unixTimestamp, publishToTopic } from "./mqttClient.js"; // adjust extension if needed
+
+const THREAD_NETWORK_NAME = "OpenThread-049a"; // From `ot-ctl networkname`
+const THREAD_DATASET_HEX = "0e080000000000010000000300001535060004001fffe002080a2824cc1be4eb7a0708fdc7f24f1fbf8ed505105b9a15554689dfcbdb820643dc41e7a9030f4f70656e5468726561642d303439610102049a041017f1751808313ae1bc9d5480ad5e97180c0402a0f7f8";      // From `ot-ctl dataset active -x`
 
 // Extracted commissioning function
 async function commissionSensor(serverNode: ServerNode, passcode: number, shortDiscriminator?: number) {
@@ -13,18 +18,31 @@ async function commissionSensor(serverNode: ServerNode, passcode: number, shortD
     const peer = await serverNode.peers.commission({
         passcode: passcode,
         shortDiscriminator: shortDiscriminator,
-        discoveryCapabilities: { ble: true },
+        discoveryCapabilities: { ble: true, onIpNetwork: true },
+        threadNetwork: {
+            networkName: THREAD_NETWORK_NAME,
+            operationalDataset: THREAD_DATASET_HEX
+        },
         regulatoryLocation: GeneralCommissioning.RegulatoryLocationType.IndoorOutdoor,
         regulatoryCountryCode: "XX",
         autoSubscribe: true
     });
 
-    const nodeId = peer.state.commissioning.peerAddress?.nodeId;
     const fabricAuthority = await serverNode.env.load(FabricAuthority);
-    const fabric = await fabricAuthority.defaultFabric({ adminFabricLabel: "IEQ Pi Bridge" }); 
-    const fabricId = fabric.fabricId;
+    const fabric = await fabricAuthority.defaultFabric({ adminFabricLabel: "IEQ Pi Bridge" });
 
-    return { fabricId, nodeId };
+    // 1. Compressed Fabric ID (8-byte Uint8Array -> 16-char hex string)
+    const globalFabricId = fabric.config.globalId;
+
+    // 2. Read BasicInformation.uniqueId (populated automatically with autoSubscribe: true)
+    const basicInfo = peer.maybeStateOf(BasicInformationClient);
+    const uniqueId = basicInfo?.uniqueId;
+
+    // 3. Fallback to nodeId if the device is Matter 1.0-1.3 and doesn't expose uniqueId
+    const nodeId = peer.state.commissioning.peerAddress?.nodeId;
+    const deviceUuid = `${globalFabricId}-${uniqueId ?? nodeId?.toString(16)}`;
+
+    return { deviceUuid, nodeId: nodeId, fabricId: globalFabricId };
 }
 
 export function startWebServer(serverNode: ServerNode, port: number = 3000) {
@@ -136,19 +154,35 @@ export function startWebServer(serverNode: ServerNode, port: number = 3000) {
 
         try {
             console.log(`Starting commissioning for ${room} (${building})...`);
-            
+
             const pairingData = ManualPairingCodeCodec.decode(pairingCode);
-            
-            const { fabricId, nodeId } = await commissionSensor(
-                serverNode, 
-                pairingData.passcode, 
+
+            const { deviceUuid, nodeId, fabricId } = await commissionSensor(
+                serverNode,
+                pairingData.passcode,
                 pairingData.shortDiscriminator
             );
-            
-            console.log(`Paired Node ID: ${nodeId} on Fabric: ${fabricId}`);
+
+            console.log(`Paired Device UUID: ${deviceUuid}`);
 
             // TODO: Execute PostgreSQL insertion function here
-            
+            const payload: Record<string, any> = {
+                device_id: deviceUuid,
+                fabric_id: fabricId?.toString(),
+                node_id: nodeId?.toString(),
+                building_name: building,
+                room_name: room,
+                location_detail: detail,
+                gps_lat: lat,
+                gps_lon: lon,
+                last_updated: unixTimestamp(new Date())
+            };
+            console.log("Metadata to insert:", payload);
+
+            await publishToTopic("devices/metadata", payload).catch(err => {
+                console.error("Failed to publish metadata to MQTT:", err);
+            });
+
             res.json({ success: true, nodeId: nodeId?.toString(), fabricId: fabricId?.toString() });
 
         } catch (error: any) {

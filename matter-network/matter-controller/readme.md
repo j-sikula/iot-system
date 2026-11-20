@@ -67,6 +67,7 @@ npm install @matter/main @matter/node mqtt
 npm install -D typescript @types/node tsx
 npm install express
 npm install -D @types/express
+npm install @matter/nodejs-ble
 ```
 
 *Verification:* Run `ls -l`. You should see a `node_modules` folder, `package.json`, and `package-lock.json`.
@@ -118,3 +119,32 @@ Run the TypeScript file directly using the `tsx` engine we installed earlier.
 npx tsx src/index.ts
 
 ```
+
+### Thread network
+
+Install packages for BLE
+```bash
+sudo apt update
+sudo apt install -y bluetooth bluez libbluetooth-dev libudev-dev build-essential
+```
+
+Unblock BLE and enable
+```bash
+sudo rfkill unblock bluetooth
+sudo hciconfig hci0 up
+```
+Check (should be up running)
+```bash
+hciconfig
+```
+
+get thread credentials:
+```bash
+sudo ot-ctl networkname
+```
+
+```bash
+sudo ot-ctl dataset active -x
+```
+
+

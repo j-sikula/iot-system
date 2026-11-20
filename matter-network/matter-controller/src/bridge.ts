@@ -1,14 +1,14 @@
 import { ChangeNotificationService, ClientNode, ClusterBehavior, ServerNode } from "@matter/node";
 import { FabricAuthority } from "@matter/protocol";
-import { 
-    TemperatureMeasurement, 
+import {
+    TemperatureMeasurement,
     PressureMeasurement,
     RelativeHumidityMeasurement,
     CarbonMonoxideConcentrationMeasurement,
-    CarbonDioxideConcentrationMeasurement, 
+    CarbonDioxideConcentrationMeasurement,
     NitrogenDioxideConcentrationMeasurement,
-    OzoneConcentrationMeasurement, 
-    Pm25ConcentrationMeasurement, 
+    OzoneConcentrationMeasurement,
+    Pm25ConcentrationMeasurement,
     FormaldehydeConcentrationMeasurement,
     Pm1ConcentrationMeasurement,
     Pm10ConcentrationMeasurement,
@@ -16,10 +16,9 @@ import {
     RadonConcentrationMeasurement,
     PowerSource
 } from "@matter/main/clusters";
-import mqtt from "mqtt";
+import { initMqttClient, publishToTopic, unixTimestamp } from "./mqttClient.js"; // adjust extension if needed
 
-const BROKER_ADDRESS = "iot-system.dynv6.net";
-const BROKER_PORT = 8883;
+
 const TOPIC = "telemetry/ieq";
 
 /**
@@ -29,20 +28,13 @@ const TOPIC = "telemetry/ieq";
  * @param serverNode - The Matter server node
  * @param mqttPassword - The password for the MQTT broker
  * @returns A promise that resolves when the bridge is set up
- */ 
- 
-export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: string) {
-    console.log(`Connecting securely to ${BROKER_ADDRESS}:${BROKER_PORT}...`);
-    
-    const mqttClient = mqtt.connect(`mqtts://${BROKER_ADDRESS}:${BROKER_PORT}`, {
-        username: "matter-bridge",
-        password: mqttPassword,
-        rejectUnauthorized: true
-    });
+ */
 
-    mqttClient.on("connect", () => {
-        console.log("Successfully connected to MQTT Broker over TLS.");
-    });
+export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: string) {
+
+    initMqttClient(mqttPassword);
+
+
 
     // Obtain the fabric context once for ID generation[cite: 2]
     const fabricAuthority = await serverNode.env.load(FabricAuthority);
@@ -50,14 +42,14 @@ export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: st
     const fabricId = fabric.fabricId.toString();
 
     const changes = serverNode.env.get(ChangeNotificationService);
-    
+
     changes.change.on(change => {
         const peer = change.endpoint.ownerOfType(ClientNode.RootEndpoint);
         if (!(peer instanceof ClientNode)) return;
 
         if (change.kind === "update") {
             if (!ClusterBehavior.is(change.behavior)) return;
-            
+
             const clusterId = change.behavior.cluster.id;
             const state = change.endpoint.stateOf(change.behavior.id);
             const changedProperties = change.properties?.reduce<Record<string, unknown>>(
@@ -69,7 +61,7 @@ export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: st
 
             const payload: Record<string, any> = {
                 device_id: `${fabricId}-${nodeId.toString()}`,
-                timestamp_unix: Math.floor(new Date().valueOf()/1000), // Unix timestamp in seconds
+                timestamp_unix: unixTimestamp(new Date()), // Unix timestamp in seconds
             };
 
             let hasTelemetry = false;
@@ -86,7 +78,7 @@ export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: st
                         payload.relative_humidity = value / 100; // Matter scales RH by 100
                         break;
                     case PressureMeasurement.id:
-                        payload.pressure = value; 
+                        payload.pressure = value;
                         break;
                     case CarbonMonoxideConcentrationMeasurement.id:
                         payload.co = value;
@@ -130,9 +122,9 @@ export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: st
             }
 
             if (hasTelemetry) {
-                const jsonPayload = JSON.stringify(payload);
-                mqttClient.publish(TOPIC, jsonPayload);
-                console.log(`Telemetry published: ${jsonPayload}`);
+                publishToTopic(TOPIC, payload).catch((err) => {
+                    console.error("Telemetry publish error:", err);
+                });
             }
         }
     });
