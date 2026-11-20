@@ -14,8 +14,8 @@ async function main() {
     const MQTT_PASSWORD = process.env.MQTT_PASSWORD;
 
     if (!MQTT_PASSWORD) {
-    throw new Error("Missing required environment variable: MQTT_PASSWORD");
-    
+        throw new Error("Missing required environment variable: MQTT_PASSWORD");
+
     }
 
     // 2. Explicitly enable BLE before creating ServerNode
@@ -26,11 +26,12 @@ async function main() {
     console.log("Initializing Matter Controller...");
 
     const serverNode = await ServerNode.create(
-        ServerNode.RootEndpointWithoutGroupcast.with(ControllerBehavior), 
+        ServerNode.RootEndpointWithoutGroupcast.with(ControllerBehavior),
         {
             environment: Environment.default,
             id: "ieq-controller",
             commissioning: { enabled: false },
+            network: { ble: false }, // Prevents ServerNode from registering BlenoPeripheralInterface
             controller: { adminFabricLabel: "IEQ Pi Bridge" }
         }
     );
