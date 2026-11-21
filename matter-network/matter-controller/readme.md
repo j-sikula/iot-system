@@ -23,6 +23,49 @@ Run emulator of CO2 sensor
 npx tsx src/sensor_emulator.ts
 ```
 
+### Running using `systemd`
+
+
+Check the service status and live logs:
+
+```bash
+sudo systemctl status matter-controller.service
+```
+
+To view the actual console output (or troubleshoot if it fails to start):
+
+```bash
+journalctl -u matter-controller.service -f
+```
+
+Restart script
+```bash
+sudo systemctl restart matter-controller.service
+```
+
+#### Initialization
+
+```bash
+sudo nano /etc/systemd/system/matter-controller.service
+```
+
+
+Paste the `matter-controller.service`
+Save and exit (`Ctrl+O`, `Enter`, then `Ctrl+X` in nano).
+
+*Verification:* Run `cat /etc/systemd/system/matter-controller.service` to confirm the file was saved with no remaining `<...>` placeholders.
+
+
+Tell `systemd` to read the new file, enable it to start on boot, and launch it immediately:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now matter-controller.service
+```
+
+*Verification:* You should see a message stating `Created symlink /etc/systemd/system/multi-user.target.wants/matter-controller.service...` with no errors.
+
+
 ## Installation 
 Google Gemini Pro "How to start with building matter.js? i should clone repo and then somehow run it? Can you show me that based on documentation? "
 

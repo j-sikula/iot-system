@@ -28,8 +28,7 @@ sudo systemctl restart otbr-agent
 
 ### Radio co-processor
 
-Compile firmware at pc (for example MacOS):
-
+Compile firmware at PC (for example MacOS):
 
 according to https://github.com/openthread/ot-nrf528xx/blob/main/src/nrf52840/README.md
 
@@ -68,7 +67,6 @@ Use the exact PCA10059 flags from the README (`USB_trans` for native USB CDC ACM
 
 ```bash
 ./script/build nrf52840 USB_trans -DOT_BOOTLOADER=USB
-
 ```
 
 ### 4. Convert `ot-rcp` to `.hex`
@@ -77,13 +75,10 @@ Make sure you convert **`ot-rcp`** (not `ot-cli-ftd` from the README example):
 
 ```bash
 arm-none-eabi-objcopy -O ihex build/bin/ot-rcp ot-rcp.hex
-
 ```
 
 
-```
-
- Package `ot-rcp.hex` as a DFU `.zip` and flash it
+Package `ot-rcp.hex` as a DFU `.zip` and flash it
 
 nRF Connect Programmer accepts DFU `.zip` packages directly (just drag-and-drop the `.zip` instead of the `.hex`), or you can flash it straight from your Mac terminal with `nrfutil`:
 
@@ -91,34 +86,25 @@ nRF Connect Programmer accepts DFU `.zip` packages directly (just drag-and-drop 
 ```bash
 brew install --cask nrfutil
 nrfutil install nrf5sdk-tools
-
 ```
-
-
 *Verification:* Run `nrfutil nrf5sdk-tools --help` and confirm `pkg` and `dfu` are listed.
+
 2. Generate the DFU `.zip` package with `--sd-req 0x00` (if your dongle has no SoftDevice) or `--sd-req 0xAE,0xCA,0x00` (covers both blank and SoftDevice-equipped factory dongles):
 ```bash
 nrfutil pkg generate --hw-version 52 --sd-req 0x00,0xAE,0xCA \
   --application ~/Desktop/ot-rcp.hex --application-version 1 ~/Desktop/ot-rcp.zip
-
 ```
 
 
 *Verification:* Confirm `~/Desktop/ot-rcp.zip` is created.
+
 3. **Either** drag `ot-rcp.zip` into **nRF Connect Programmer** and click **Write**, **or** flash it directly from your Mac terminal while the red LED is pulsing:
 ```bash
 ls /dev/cu.usbmodem*
 nrfutil dfu usb-serial -pkg ~/Desktop/ot-rcp.zip -p /dev/cu.usbmodem<YOUR_ID>
-
 ```
 *Verification:* The tool prints `Device programmed.`, the pulsing red LED stops, and the dongle reboots into RCP mode.
 
-Remove unnecessary packages from RPi
-```bash
-rm -rf ~/ot-nrf528xx
-sudo apt-get purge -y gcc-arm-none-eabi libnewlib-arm-none-eabi
-sudo apt-get autoremove -y
-```
 
 ### Config Thread network
 
