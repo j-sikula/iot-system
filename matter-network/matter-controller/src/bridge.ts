@@ -17,6 +17,7 @@ import {
     PowerSource
 } from "@matter/main/clusters";
 import { initMqttClient, publishToTopic, unixTimestamp } from "./mqttClient.js"; // adjust extension if needed
+import { BasicInformationClient } from "@matter/main/behaviors/basic-information";
 
 
 const TOPIC = "telemetry/ieq";
@@ -39,7 +40,7 @@ export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: st
     // Obtain the fabric context once for ID generation[cite: 2]
     const fabricAuthority = await serverNode.env.load(FabricAuthority);
     const fabric = await fabricAuthority.defaultFabric({ adminFabricLabel: "IEQ Pi Bridge" });
-    const fabricId = fabric.fabricId.toString();
+    const fabricId = fabric.globalId.toString();
 
     const changes = serverNode.env.get(ChangeNotificationService);
 
@@ -56,11 +57,16 @@ export async function setupGlobalBridge(serverNode: ServerNode, mqttPassword: st
                 (o, n) => ((o[n] = state[n]), o), {}
             ) ?? state;
 
+            const deviceUUID = peer.maybeStateOf(BasicInformationClient)?.uniqueId;
+            // 3. Fallback to nodeId if the device is Matter 1.0-1.3 and doesn't expose uniqueId
             const nodeId = peer.state.commissioning.peerAddress?.nodeId;
-            if (!nodeId) return;
+            if (!deviceUUID && !nodeId) {
+                return;
+            }
+               
 
             const payload: Record<string, any> = {
-                device_id: `${fabricId}-${nodeId.toString()}`,
+                device_id: `${fabricId}-${deviceUUID ?? nodeId?.toString(16)}`,
                 timestamp_unix: unixTimestamp(new Date()), // Unix timestamp in seconds
             };
 

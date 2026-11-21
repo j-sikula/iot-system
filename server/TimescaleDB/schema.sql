@@ -42,8 +42,8 @@ SELECT add_compression_policy('ieq_readings', INTERVAL '7 days', if_not_exists =
 -- Table 2: Metadata (Standard PostgreSQL Table)
 CREATE TABLE IF NOT EXISTS device_metadata (
     device_id VARCHAR(64) PRIMARY KEY,
-    fabric_id VARCHAR(20),
-    node_id VARCHAR(20),
+    fabric_uuid VARCHAR(20),
+    node_uuid VARCHAR(20),
     building_name VARCHAR(100),
     room_name VARCHAR(100),
     location_detail VARCHAR(100), -- e.g., "Ceiling", "Wall-mounted"

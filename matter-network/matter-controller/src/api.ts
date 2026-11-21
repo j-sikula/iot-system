@@ -42,7 +42,7 @@ async function commissionSensor(serverNode: ServerNode, passcode: number, shortD
     const nodeId = peer.state.commissioning.peerAddress?.nodeId;
     const deviceUuid = `${globalFabricId}-${uniqueId ?? nodeId?.toString(16)}`;
 
-    return { deviceUuid, nodeId: nodeId, fabricId: globalFabricId };
+    return { deviceUuid, nodeUUID: uniqueId ?? nodeId, fabricUUID: globalFabricId };
 }
 
 export function startWebServer(serverNode: ServerNode, port: number = 3000) {
@@ -157,7 +157,7 @@ export function startWebServer(serverNode: ServerNode, port: number = 3000) {
 
             const pairingData = ManualPairingCodeCodec.decode(pairingCode);
 
-            const { deviceUuid, nodeId, fabricId } = await commissionSensor(
+            const { deviceUuid, nodeUUID, fabricUUID } = await commissionSensor(
                 serverNode,
                 pairingData.passcode,
                 pairingData.shortDiscriminator
@@ -168,8 +168,8 @@ export function startWebServer(serverNode: ServerNode, port: number = 3000) {
             // TODO: Execute PostgreSQL insertion function here
             const payload: Record<string, any> = {
                 device_id: deviceUuid,
-                fabric_id: fabricId?.toString(),
-                node_id: nodeId?.toString(),
+                fabric_uuid: fabricUUID?.toString(),
+                node_uuid: nodeUUID?.toString(),
                 building_name: building,
                 room_name: room,
                 location_detail: detail,
@@ -183,7 +183,7 @@ export function startWebServer(serverNode: ServerNode, port: number = 3000) {
                 console.error("Failed to publish metadata to MQTT:", err);
             });
 
-            res.json({ success: true, nodeId: nodeId?.toString(), fabricId: fabricId?.toString() });
+            res.json({ success: true, nodeId: nodeUUID?.toString(), fabricId: fabricUUID?.toString() });
 
         } catch (error: any) {
             console.error("Commissioning failed:", error);
